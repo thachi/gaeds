@@ -6,7 +6,7 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable.Map
 import scala.reflect.{classTag, ClassTag}
 import com.google.appengine.api.datastore.{ DatastoreServiceFactory, KeyFactory, Entity, FetchOptions, Transaction }
-import com.google.appengine.api.datastore.{ Key => LLKey }
+import com.google.appengine.api.datastore.{ Key => LLKey, TransactionOptions }
 import org.json4s._
 
 object Datastore {
@@ -145,6 +145,7 @@ object Datastore {
 
   // Transaction
   def beginTransaction() = service.beginTransaction()
+  def beginGlobalTransaction() = service.beginTransaction(TransactionOptions.Builder.withXG(true))
   def activeTransactions() = service.getActiveTransactions()
   def currentTransaction() = service.getCurrentTransaction()
   def currentTransaction(returnedIfNoTxn: Transaction) = service.getCurrentTransaction(returnedIfNoTxn)
@@ -162,6 +163,20 @@ object Datastore {
     }
   }
   def transaction[T](block: => T): T = transaction((t: Transaction) => block)
+
+  def globalTransaction[T](block: Transaction => T): T = {
+    val t = service.beginTransaction(TransactionOptions.Builder.withXG(true))
+    try {
+      val res = block(t)
+      t.commit()
+      res
+    } finally {
+      if (t.isActive) {
+        t.rollback()
+      }
+    }
+  }
+  def globalTransaction[T](block: => T): T = globalTransaction((t: Transaction) => block)
 
   // Key
   def allocateIdRange[T <: Mapper[T]](range: KeyRange[T]) =
