@@ -168,7 +168,7 @@ object Datastore {
     service.allocateIdRange(range.range)
 
   def allocateIds[T <: Mapper[T]: ClassTag, U <: Mapper[U]](parent: Key[U], num: Long): KeyRange[T] =
-    KeyRange(service.allocateIds(mapperCompanion[T].kind, num))
+    KeyRange(service.allocateIds(parent.key, mapperCompanion[T].kind, num))
   def allocateIds[T <: Mapper[T]: ClassTag](num: Long): KeyRange[T] =
     KeyRange(service.allocateIds(mapperCompanion[T].kind, num))
 
