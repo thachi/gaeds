@@ -24,7 +24,7 @@ import com.github.hexx.gaeds.Property._
 import SampleData._
 
 class GaedsSpec extends WordSpec with BeforeAndAfter with MustMatchers {
-  val helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
+  val helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig().setApplyAllHighRepJobPolicy())
   before {
     helper.setUp()
   }
@@ -132,6 +132,15 @@ class GaedsSpec extends WordSpec with BeforeAndAfter with MustMatchers {
       val d1 = data
       val k = d1.put
       Datastore.transaction {
+        val d2 = Datastore.get(k)
+        putAndGetCheck(k, d1, d2)
+        Datastore.delete(k)
+      }
+    }
+    "put and get using global transactions" in {
+      val d1 = data
+      val k = d1.put
+      Datastore.globalTransaction {
         val d2 = Datastore.get(k)
         putAndGetCheck(k, d1, d2)
         Datastore.delete(k)
