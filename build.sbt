@@ -2,9 +2,9 @@ organization := "com.github.hexx"
 
 name := "gaeds"
 
-version := "0.2.0"
+version := "0.2.0-x8"
 
-scalaVersion := "2.10.1"
+scalaVersion := "2.10.3"
 
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 
